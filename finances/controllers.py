@@ -16,13 +16,13 @@ from .models import User
 
 @app.route('/')
 @view('home')
-def index():
+def home():
     pass
 
 
-@app.route('/sign_in', method=['GET', 'POST'])
-@view('sign_in')
-def sign_in():
+@app.route('/register', method=['GET', 'POST'])
+@view('register')
+def register():
     username = get('username')
     password = get('password')
 
@@ -31,6 +31,31 @@ def sign_in():
 
     if not password:
         return {'error': 'Password blank!'}
+
+    username = username.lower()
+
+    try:
+        User.register(username, password)
+    except (User.RegisterError, errors.ValidationError) as exc:
+        return {'error': exc}
+
+    set_cookie('username', username)
+    redirect('/')
+
+
+@app.route('/login', method=['GET', 'POST'])
+@view('login')
+def login():
+    username = get('username')
+    password = get('password')
+
+    if not username:
+        return
+
+    if not password:
+        return {'error': 'Password blank!'}
+
+    username = username.lower()
 
     try:
         User.auth(username, password)
@@ -43,29 +68,8 @@ def sign_in():
     redirect('/')
 
 
-@app.route('/sign_on', method=['GET', 'POST'])
-@view('sign_on')
-def sign_in():
-    username = get('username')
-    password = get('password')
-
-    if not username:
-        return
-
-    if not password:
-        return {'error': 'Password blank!'}
-
-    try:
-        User.register(username, password)
-    except (User.RegisterError, errors.ValidationError) as exc:
-        return {'error': exc}
-
-    set_cookie('username', username)
-    redirect('/')
-
-
-@app.route('/sign_out')
-def sign_out():
+@app.route('/logout')
+def logout():
     delete_cookie('username')
     redirect('/')
 

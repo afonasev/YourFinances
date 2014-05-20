@@ -1,5 +1,5 @@
 % rebase('base.html')
-<h1>Sign on now!</h1>
+<h1>Create a new Finances account</h1>
 
 % if get('error'):
     <div class="section" id="error">
@@ -8,13 +8,13 @@
 % end
 
 <div class="section" id="register_form">
-    <form action="/sign_on" method="post">
+    <form action="/register" method="post">
         Username: <br><input name="username" type="text"/><br>
         Password: <br><input name="password" type="password"/><br>
-        <input value="Login" type="submit"/>
+        <input value="Register" type="submit"/>
     </form>
 </div>
 
 <div class="section" id="info">
-    <p><b>Username must be longer than 4 letters.</b></p>
+    <p><b>Username must be longer than 5 letters.</b></p>
 </div>
