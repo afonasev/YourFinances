@@ -1,1 +1,8 @@
+# need for work app
 bottle
+peewee
+
+# requirements for tests and manage.py
+click
+nose
+webtest

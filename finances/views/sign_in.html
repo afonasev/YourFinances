@@ -1,0 +1,16 @@
+% rebase('base.html')
+<h1>Sign in now!</h1>
+
+% if get('error'):
+    <div class="section" id="error">
+        <p class="error">{{ error }}</p>
+    </div>
+% end
+
+<div class="section" id="login_form">
+    <form action="/sign_in" method="post">
+        Username: <br><input name="username" type="text"/><br>
+        Password: <br><input name="password" type="password"/><br>
+        <input value="Login" type="submit"/>
+    </form>
+</div>

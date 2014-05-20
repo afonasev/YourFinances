@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+
+% username = get('username')
+
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Finances</title>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+
+<body id="index" class="home">
+
+<header id="banner" class="body">
+    <h1><a href="/">Finances <strong>Храни и умножай.</strong></a></h1>
+    <nav>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/about">About</a></li>
+            % if username:
+                <li><a href="/sign_out">Sign Out</a></li>
+            % else:
+                <li><a href="/sign_in">Sign In</a></li>
+                <li><a href="/sign_on">Sign On</a></li>
+            % end
+        </ul>
+    </nav>
+</header>
+
+<aside id='intro' class='body'>
+    <article>
+        % if username:
+            <b>Hello <a href="/user/{{ username }}">{{ username.title() }}</a>!</b>
+        % else:
+            <b>Hello Guest!</b>
+        % end
+    </article>
+</aside>
+
+<aside id="featured" class="body">
+    <article>
+        {{ !base }}
+    </article>
+</aside>
+
+<footer id="contentinfo" class="body">
+    <p>
+        Copyright © 2014 by
+        <a href="/about"><strong>Team</strong></a><br/>
+</footer>
+
+<a href="https://github.com/afonasev">
+<img style="position: absolute; top: 0; right: 0; border: 0;"
+     src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67"
+     alt="Fork me on GitHub"
+     data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+
+</body>
+</html>

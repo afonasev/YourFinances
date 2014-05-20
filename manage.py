@@ -1,15 +1,73 @@
 #!/usr/bin/env python
-import sys
+import os
+import logging
+import contextlib
 
-import finances
+import click
+import peewee
+
+from finances import app
+from finances import models
+
+
+logger = logging.getLogger('peewee')
+logger.setLevel(logging.FATAL)
+logger.addHandler(logging.StreamHandler())
+
+
+@click.group()
+def cli():
+    pass
+
+
+@cli.command(help='Init database')
+@click.option('--db', default=app.config['database'])
+@click.option('--silently', is_flag=True, help='Fail silently mod, default=OFF')
+@click.option('--clean', is_flag=True, help='Clean database if it exist, default=OFF')
+def init(db, silently, clean):
+    if clean:
+        os.remove(db)
+        print('Database was removed: %s' % db)
+
+    app_base_init(db)
+
+    print('Init database: %s' % db)
+    for model in [models.User]:
+        model.create_table(silently)
+
+
+@cli.command(help='Running server for Finances web application')
+@click.option('--db', default=app.config['database'])
+@click.option('--host', default='localhost', help='Default=localhost')
+@click.option('--port', default=8080, help='Default=8080')
+@click.option('--reloader', is_flag=True, help='Reloader mod, default=OFF')
+@click.option('--debug', is_flag=True, help='Debug mod, default=OFF')
+def run(db, debug, reloader, host, port):
+    print('Running server for Finances web application')
+    app_base_init(db)
+    app.run(host=host, port=port, debug=debug, reloader=reloader, interval=0.5)
+
+
+@cli.command(help='Do something')
+@click.option('--db', default=app.config['database'])
+def do(db):
+    app_base_init(db)
+    user = models.User(name='user1', password='123')
+    user.save()
+
+
+@cli.command(help='Run auto tests')
+def test():
+    os.system(r'../scripts/run_tests.sh finances')
+
+
+def app_base_init(db):
+    database = peewee.SqliteDatabase(db)
+    models.database.initialize(database)
 
 
 if __name__ == '__main__':
-    if not sys.argv or 'help' in sys.argv:
-        print('HELP text will be here!')
-
-    elif 'run' in sys.argv:
-        finances.app.run(host='localhost', port=8080, debug=True)
-
-    else:
-        print('Unknown command')
+    try:
+        cli()
+    except Exception as exc:
+        print('ERROR: %s!' % exc)
