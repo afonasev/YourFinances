@@ -20,20 +20,28 @@ def home():
     pass
 
 
+def validate_name_pass_form(func):
+    def wrapper():
+        username = get('username')
+        password = get('password')
+
+        if not username:
+            return
+
+        if len(username) < 6:
+            return {'error': 'Username must be longer than 5 letters'}
+
+        if not password:
+            return {'error': 'Password blank!'}
+
+        return func(username.lower(), password)
+    return wrapper
+
+
 @app.route('/register', method=['GET', 'POST'])
 @view('register')
-def register():
-    username = get('username')
-    password = get('password')
-
-    if not username:
-        return
-
-    if not password:
-        return {'error': 'Password blank!'}
-
-    username = username.lower()
-
+@validate_name_pass_form
+def register(username, password):
     try:
         User.register(username, password)
     except (User.RegisterError, errors.ValidationError) as exc:
@@ -45,18 +53,8 @@ def register():
 
 @app.route('/login', method=['GET', 'POST'])
 @view('login')
-def login():
-    username = get('username')
-    password = get('password')
-
-    if not username:
-        return
-
-    if not password:
-        return {'error': 'Password blank!'}
-
-    username = username.lower()
-
+@validate_name_pass_form
+def login(username, password):
     try:
         User.auth(username, password)
     except User.DoesNotExist:

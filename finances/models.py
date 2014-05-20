@@ -4,8 +4,6 @@ import datetime
 
 import peewee
 
-from . import errors
-
 
 database = peewee.Proxy()
 
@@ -42,9 +40,6 @@ class User(BaseModel):
 
     @classmethod
     def register(cls, name, password):
-        if len(name) < 6:
-            raise errors.ValidationError('Username must be longer than 5 letters')
-
         try:
             User.get(name=name)
             raise cls.RegisterError('User with that name does exist')
