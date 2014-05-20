@@ -50,3 +50,6 @@ class User(BaseModel):
         pass_with_salt = password + user.salt
         user.password = hashlib.sha224(pass_with_salt.encode()).hexdigest()
         user.save()
+
+    def __repr__(self):
+        return '<User %r>' % self.username
