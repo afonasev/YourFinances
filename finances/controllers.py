@@ -26,7 +26,7 @@ def validate_name_pass_form(func):
         password = get('password')
 
         if not username:
-            return
+            return {'error': 'username blank!'}
 
         if len(username) < 6:
             return {'error': 'Username must be longer than 5 letters'}
@@ -78,7 +78,7 @@ def logout():
     redirect('/sign_in')
 
 
-@app.route('/<filetype>/<filepath:path>')
+@app.route('/<filetype>/<filepath>')
 def static(filepath, filetype=None):
     static_path = './finances/static/' + filetype
     return static_file(filepath, root=static_path)

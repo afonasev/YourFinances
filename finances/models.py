@@ -78,16 +78,16 @@ class Category(BaseModel):
         order_by = ('name',)
 
 
-# class Transaction(BaseModel):
-#     id = peewee.IntegerField(primary_key=True)
-#     category = peewee.ForeignKeyField(Category, related_name='transactions')
-#     value = peewee.FloatField()
-#     description = peewee.TextField()
-#     need = peewee.ForeignKeyField(Category, related_name='transactions')
-#     date = peewee.DateTimeField(default=datetime.datetime.now)
-#
-#     def __repr__(self):
-#         return '<Transaction %r>' % self.id
-#
-#     class Meta:
-#         order_by = ('-date',)
+class Transaction(BaseModel):
+    id = peewee.IntegerField(primary_key=True)
+    category = peewee.ForeignKeyField(Category, related_name='transactions')
+    value = peewee.FloatField()
+    description = peewee.TextField()
+    need = peewee.ForeignKeyField(Category, related_name='transactions')
+    date = peewee.DateTimeField(default=datetime.datetime.now)
+
+    def __repr__(self):
+        return '<Transaction %r>' % self.id
+
+    class Meta:
+        order_by = ('-date',)

@@ -31,7 +31,7 @@ def init(db, silently, clean):
     app_base_init(db)
 
     print('Init database: %s' % db)
-    for model in [models.User, models.Category, models.CategoryType]:
+    for model in [models.User, models.Category, models.CategoryType, models.Transaction]:
         model.create_table(silently)
 
 
