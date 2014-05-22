@@ -1,5 +1,6 @@
-# need for work app
+# requirements for work app
 bottle
+bottle-beaker
 peewee
 
 # requirements for manage.py

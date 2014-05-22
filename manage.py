@@ -1,7 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import os
 import logging
-import contextlib
 
 import click
 import peewee
