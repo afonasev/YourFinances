@@ -2,7 +2,10 @@
 bottle
 peewee
 
-# requirements for tests and manage.py
+# requirements for manage.py
 click
+
+# requirements for tests
 nose
+coverage
 webtest
