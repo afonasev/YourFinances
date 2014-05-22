@@ -1,8 +1,12 @@
-# need for work app
+# requirements for work app
 bottle
+bottle-beaker
 peewee
 
-# requirements for tests and manage.py
+# requirements for manage.py
 click
+
+# requirements for tests
 nose
+coverage
 webtest
