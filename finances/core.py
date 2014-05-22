@@ -15,28 +15,9 @@ set_cookie = lambda name, val: bottle.response.set_cookie(name, val, secret=app.
 delete_cookie = lambda name: bottle.response.delete_cookie(name)
 
 
-def view(tpl_name, **defaults):
-    def decorator(func):
-        def inside_decorator(f):
-            def wrapper(*args, **kwargs):
-                result = f(*args, **kwargs)
-                username = get_cookie('username')
-                if result is not None:
-                    result['username'] = username
-                else:
-                    result = {'username': username}
-                return result
-            return wrapper
-        return bottle.view(tpl_name, **defaults)(inside_decorator(func))
-    return decorator
-
-
 def login_required(func):
     def wrapper(*args, **kwargs):
         if not get_cookie('username'):
-            redirect('/')
+           bottle.redirect('/sign_in')
         return func(*args, **kwargs)
     return wrapper
-
-
-from .controllers import *

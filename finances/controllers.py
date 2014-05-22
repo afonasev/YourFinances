@@ -1,23 +1,22 @@
 
+from bottle import view
 from bottle import error
 from bottle import redirect
 from bottle import static_file
 
 from . import errors
-
 from .core import app
 from .core import get
-from .core import view
-from .core import login_required
 from .core import set_cookie
 from .core import delete_cookie
-
+from .core import login_required
 from .models import User
 
 
 @app.route('/')
-@view('home')
-def home():
+@view('finances')
+@login_required
+def finances():
     pass
 
 
@@ -39,8 +38,14 @@ def validate_name_pass_form(func):
     return wrapper
 
 
+@app.route('/sign_in')
+@view('sign_in')
+def sign_in():
+   pass
+
+
 @app.route('/register', method=['GET', 'POST'])
-@view('register')
+@view('sign_in')
 @validate_name_pass_form
 def register(username, password):
     try:
@@ -53,15 +58,15 @@ def register(username, password):
 
 
 @app.route('/login', method=['GET', 'POST'])
-@view('login')
+@view('sign_in')
 @validate_name_pass_form
 def login(username, password):
     try:
         User.auth(username, password)
     except User.DoesNotExist:
-        return {'error': 'User with that name does not exists!'}
+       return {'error': 'User with that name does not exists!'}
     except User.AuthError as exc:
-        return {'error': exc}
+       return {'error': exc}
 
     set_cookie('username', username)
     redirect('/')
@@ -70,14 +75,7 @@ def login(username, password):
 @app.route('/logout')
 def logout():
     delete_cookie('username')
-    redirect('/')
-
-
-@app.route('/expences')
-@view('expences')
-@login_required
-def expences():
-    pass
+    redirect('/sign_in')
 
 
 @app.route('/<filetype>/<filepath:path>')
