@@ -8,6 +8,7 @@ from . import errors
 from .core import app
 from .core import get
 from .core import view
+from .core import login_required
 from .core import set_cookie
 from .core import delete_cookie
 
@@ -70,6 +71,13 @@ def login(username, password):
 def logout():
     delete_cookie('username')
     redirect('/')
+
+
+@app.route('/expences')
+@view('expences')
+@login_required
+def expences():
+    pass
 
 
 @app.route('/<filetype>/<filepath:path>')

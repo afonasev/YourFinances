@@ -31,4 +31,12 @@ def view(tpl_name, **defaults):
     return decorator
 
 
+def login_required(func):
+    def wrapper(*args, **kwargs):
+        if not get_cookie('username'):
+            redirect('/')
+        return func(*args, **kwargs)
+    return wrapper
+
+
 from .controllers import *

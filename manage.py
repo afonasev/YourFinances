@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import os
 import logging
-import contextlib
 
 import click
 import peewee
@@ -32,7 +31,7 @@ def init(db, silently, clean):
     app_base_init(db)
 
     print('Init database: %s' % db)
-    for model in [models.User]:
+    for model in [models.User, models.Category, models.CategoryType]:
         model.create_table(silently)
 
 
@@ -52,8 +51,9 @@ def run(db, debug, reloader, host, port):
 @click.option('--db', default=app.config['database'])
 def do(db):
     app_base_init(db)
-    user = models.User(name='user1', password='123')
-    user.save()
+    m = models.Category.get(name='sdfgdg')
+    # m.save()
+    print(m.type)
 
 
 @cli.command(help='Run auto tests')

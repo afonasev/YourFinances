@@ -52,4 +52,42 @@ class User(BaseModel):
         user.save()
 
     def __repr__(self):
-        return '<User %r>' % self.username
+        return '<User %r>' % self.name
+
+    class Meta:
+        order_by = ('name',)
+
+
+class CategoryType(BaseModel):
+    id = peewee.IntegerField(primary_key=True)
+    name = peewee.CharField()
+
+    def __repr__(self):
+        return '<CategoryType %r>' % self.name
+
+
+class Category(BaseModel):
+    id = peewee.IntegerField(primary_key=True)
+    name = peewee.CharField()
+    type = peewee.ForeignKeyField(CategoryType, related_name='categories')
+
+    def __repr__(self):
+        return '<Category %r>' % self.name
+
+    class Meta:
+        order_by = ('name',)
+
+
+# class Transaction(BaseModel):
+#     id = peewee.IntegerField(primary_key=True)
+#     category = peewee.ForeignKeyField(Category, related_name='transactions')
+#     value = peewee.FloatField()
+#     description = peewee.TextField()
+#     need = peewee.ForeignKeyField(Category, related_name='transactions')
+#     date = peewee.DateTimeField(default=datetime.datetime.now)
+#
+#     def __repr__(self):
+#         return '<Transaction %r>' % self.id
+#
+#     class Meta:
+#         order_by = ('-date',)
