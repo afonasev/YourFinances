@@ -19,10 +19,13 @@
         <ul>
             <li><a href="/about">About</a></li>
         % if username:
-            <li><a href="/user/{{ username }}">Profile</a></li>
+            <li><a href="/profile">Profile</a></li>
             <li><a href="/logout">Logout</a></li>
+            <li><a href="/spending">Spending</a></li>
+            <li><a href="/incoming">Incoming</a></li>
         % else:
-            <li><a href="/sign_in">Sign in</a></li>
+            <li><a href="/login">Login</a></li>
+            <li><a href="/register">Register</a></li>
         % end
         </ul>
     </nav>

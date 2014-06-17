@@ -1,0 +1,16 @@
+% rebase('base.html')
+
+<h1>Create a new account</h1>
+<div class="section" id="register_form">
+    <form action="/register" method="post">
+        Username: <br><input name="username" type="text"/><br>
+        Password: <br><input name="password" type="password"/><br>
+        <input value="Register" type="submit"/>
+    </form>
+</div>
+
+% if get('error'):
+<div class="section" id="error">
+    <p class="error">{{ error }}</p>
+</div>
+% end

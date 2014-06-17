@@ -4,7 +4,6 @@ from bottle import error
 from bottle import redirect
 from bottle import static_file
 
-from . import errors
 from .core import app
 from .core import get
 from .core import set_cookie
@@ -14,9 +13,21 @@ from .models import User
 
 
 @app.route('/')
-@view('finances')
+def index():
+    redirect('/spending')
+
+
+@app.route('/spending')
+@view('spending')
 @login_required
-def finances():
+def spending():
+    pass
+
+
+@app.route('/incoming')
+@view('incoming')
+@login_required
+def incoming():
     pass
 
 
@@ -25,32 +36,23 @@ def validate_name_pass_form(func):
         username = get('username')
         password = get('password')
 
-        if not username:
-            return {'error': 'username blank!'}
+        if not username or not password:
+            return
 
         if len(username) < 6:
             return {'error': 'Username must be longer than 5 letters'}
-
-        if not password:
-            return {'error': 'Password blank!'}
 
         return func(username.lower(), password)
     return wrapper
 
 
-@app.route('/sign_in')
-@view('sign_in')
-def sign_in():
-   pass
-
-
 @app.route('/register', method=['GET', 'POST'])
-@view('sign_in')
+@view('register')
 @validate_name_pass_form
 def register(username, password):
     try:
         User.register(username, password)
-    except (User.RegisterError, errors.ValidationError) as exc:
+    except User.RegisterError as exc:
         return {'error': exc}
 
     set_cookie('username', username)
@@ -58,15 +60,15 @@ def register(username, password):
 
 
 @app.route('/login', method=['GET', 'POST'])
-@view('sign_in')
+@view('login')
 @validate_name_pass_form
 def login(username, password):
     try:
         User.auth(username, password)
     except User.DoesNotExist:
-       return {'error': 'User with that name does not exists!'}
+        return {'error': 'User with that name does not exists!'}
     except User.AuthError as exc:
-       return {'error': exc}
+        return {'error': exc}
 
     set_cookie('username', username)
     redirect('/')
@@ -75,7 +77,7 @@ def login(username, password):
 @app.route('/logout')
 def logout():
     delete_cookie('username')
-    redirect('/sign_in')
+    redirect('/login')
 
 
 @app.route('/<filetype>/<filepath>')
@@ -86,9 +88,9 @@ def static(filepath, filetype=None):
 
 @error(403)
 def mistake403(code):
-    return 'The parameter you passed has the wrong format!'
+    return 'The parameter you passed has the wrong format! ERROR %r' % code
 
 
 @error(404)
 def mistake404(code):
-    return 'Sorry, this page does not exist!'
+    return 'Sorry, this page does not exist! ERROR %r' % code

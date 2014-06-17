@@ -1,8 +1,15 @@
-import os
+import uuid
 import hashlib
 import datetime
 
 import peewee
+
+from peewee import IntegerField
+from peewee import FloatField
+from peewee import CharField
+from peewee import TextField
+from peewee import DateTimeField
+from peewee import ForeignKeyField
 
 
 database = peewee.Proxy()
@@ -14,11 +21,11 @@ class BaseModel(peewee.Model):
 
 
 class User(BaseModel):
-    id = peewee.IntegerField(primary_key=True)
-    name = peewee.CharField(unique=True)
-    password = peewee.CharField()
-    salt = peewee.CharField(default=os.urandom(10).decode('cp1251', errors='replace'))
-    join_date = peewee.DateTimeField(default=datetime.datetime.now)
+    id = IntegerField(primary_key=True)
+    name = CharField(unique=True)
+    password = CharField()
+    salt = CharField(default=str(uuid.uuid4()))
+    join_date = DateTimeField(default=datetime.datetime.now)
 
     class AuthError(Exception):
         pass
@@ -58,33 +65,29 @@ class User(BaseModel):
         order_by = ('name',)
 
 
-class CategoryType(BaseModel):
-    id = peewee.IntegerField(primary_key=True)
-    name = peewee.CharField()
+class _Category(BaseModel):
+    id = IntegerField(primary_key=True)
+    name = CharField(unique=True)
 
     def __repr__(self):
-        return '<CategoryType %r>' % self.name
+        return '<%s %r>' % (self.__name__, self.name)
 
 
-class Category(BaseModel):
-    id = peewee.IntegerField(primary_key=True)
-    name = peewee.CharField()
-    type = peewee.ForeignKeyField(CategoryType, related_name='categories')
+class Category(_Category):
+    pass
 
-    def __repr__(self):
-        return '<Category %r>' % self.name
 
-    class Meta:
-        order_by = ('name',)
+class SubCategory(_Category):
+    pass
 
 
 class Transaction(BaseModel):
-    id = peewee.IntegerField(primary_key=True)
-    category = peewee.ForeignKeyField(Category, related_name='transactions')
-    value = peewee.FloatField()
-    description = peewee.TextField()
-    need = peewee.ForeignKeyField(Category, related_name='transactions')
-    date = peewee.DateTimeField(default=datetime.datetime.now)
+    id = IntegerField(primary_key=True)
+    category = ForeignKeyField(Category, related_name='transactions')
+    sub_category = ForeignKeyField(SubCategory, related_name='transactions')
+    date = DateTimeField(default=datetime.datetime.now)
+    value = FloatField()
+    description = TextField()
 
     def __repr__(self):
         return '<Transaction %r>' % self.id

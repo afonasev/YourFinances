@@ -13,56 +13,56 @@ logger = logging.getLogger('peewee')
 logger.setLevel(logging.FATAL)
 logger.addHandler(logging.StreamHandler())
 
+db_path = app.config['database']
+
 
 @click.group()
 def cli():
     pass
 
 
-@cli.command(help='Init database')
-@click.option('--db', default=app.config['database'])
-@click.option('--silently', is_flag=True, help='Fail silently mod, default=OFF')
-@click.option('--clean', is_flag=True, help='Clean database if it exist, default=OFF')
-def init(db, silently, clean):
-    if clean:
-        os.remove(db)
-        print('Database was removed: %s' % db)
+@cli.command()
+@click.option('--silently', is_flag=True)
+@click.option('--remove', is_flag=True)
+def init(silently, remove):
+    if remove:
+        os.remove(db_path)
+        msg = click.style("Database was removed: %s" % db_path, fg='red')
+        click.echo(msg)
 
-    app_base_init(db)
+    app_base_init()
 
-    print('Init database: %s' % db)
-    for model in [models.User, models.Category, models.CategoryType, models.Transaction]:
+    msg = click.style("Init database: %s" % db_path, fg='green')
+    click.echo(msg)
+
+    for model in [
+        models.User,
+        models.Category,
+        models.SubCategory,
+        models.Transaction,
+    ]:
         model.create_table(silently)
 
 
-@cli.command(help='Running server for Finances web application')
-@click.option('--db', default=app.config['database'])
-@click.option('--host', default='localhost', help='Default=localhost')
-@click.option('--port', default=8080, help='Default=8080')
-@click.option('--reloader', is_flag=True, help='Reloader mod, default=OFF')
-@click.option('--debug', is_flag=True, help='Debug mod, default=OFF')
-def run(db, debug, reloader, host, port):
-    print('Running server for Finances web application')
-    app_base_init(db)
-    app.run(host=host, port=port, debug=debug, reloader=reloader, interval=0.5)
+@cli.command()
+def run():
+    msg = click.style("Running server for Finances web application", fg='green')
+    click.echo(msg)
+
+    app_base_init()
+    app.run(debug=True, reloader=True, interval=0.5)
 
 
-@cli.command(help='Do something')
-@click.option('--db', default=app.config['database'])
-def do(db):
-    app_base_init(db)
-    m = models.Category.get(name='sdfgdg')
-    # m.save()
-    print(m.type)
-
-
-@cli.command(help='Run auto tests')
+@cli.command()
 def test():
-    os.system(r'../scripts/run_tests.sh finances')
+    os.system(
+        r'nosetests --cover-package=finances'
+        r'--cover-erase --with-coverage --with-doctest'
+    )
 
 
-def app_base_init(db):
-    database = peewee.SqliteDatabase(db)
+def app_base_init():
+    database = peewee.SqliteDatabase(db_path)
     models.database.initialize(database)
 
 
@@ -70,4 +70,4 @@ if __name__ == '__main__':
     try:
         cli()
     except Exception as exc:
-        print('ERROR: %s!' % exc)
+        click.echo(click.style("ERROR: %s!" % exc, fg='red'))
