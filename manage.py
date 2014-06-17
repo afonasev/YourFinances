@@ -6,8 +6,6 @@ import click
 import bottle
 import peewee
 
-import config
-
 from finances import app
 from finances import models
 
@@ -15,6 +13,11 @@ from finances import models
 logger = logging.getLogger('peewee')
 logger.setLevel(logging.FATAL)
 logger.addHandler(logging.StreamHandler())
+
+try:
+    import config
+except ImportError:
+    import example_config as config
 
 app.config['secret_key'] = config.secret_key
 app.config['static_path'] = config.static_path
