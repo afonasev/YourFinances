@@ -3,7 +3,10 @@ import os
 import logging
 
 import click
+import bottle
 import peewee
+
+import config
 
 from finances import app
 from finances import models
@@ -13,7 +16,14 @@ logger = logging.getLogger('peewee')
 logger.setLevel(logging.FATAL)
 logger.addHandler(logging.StreamHandler())
 
-db_path = app.config['database']
+app.config['secret_key'] = config.secret_key
+app.config['static_path'] = config.static_path
+
+bottle.TEMPLATE_PATH = [config.views_path]
+
+db_path = config.database_path
+database = peewee.SqliteDatabase(config.database_path)
+models.database.initialize(database)
 
 
 @click.group()
@@ -29,8 +39,6 @@ def init(silently, remove):
         os.remove(db_path)
         msg = click.style("Database was removed: %s" % db_path, fg='red')
         click.echo(msg)
-
-    app_base_init()
 
     msg = click.style("Init database: %s" % db_path, fg='green')
     click.echo(msg)
@@ -49,7 +57,6 @@ def run():
     msg = click.style("Running server for Finances web application", fg='green')
     click.echo(msg)
 
-    app_base_init()
     app.run(debug=True, reloader=True, interval=0.5)
 
 
@@ -59,11 +66,6 @@ def test():
         r'nosetests --cover-package=finances'
         r'--cover-erase --with-coverage --with-doctest'
     )
-
-
-def app_base_init():
-    database = peewee.SqliteDatabase(db_path)
-    models.database.initialize(database)
 
 
 if __name__ == '__main__':

@@ -82,8 +82,7 @@ def logout():
 
 @app.route('/<filetype>/<filepath>')
 def static(filepath, filetype=None):
-    static_path = './finances/static/' + filetype
-    return static_file(filepath, root=static_path)
+    return static_file(filepath, root=app.config['static_path'] + filetype)
 
 
 @error(403)

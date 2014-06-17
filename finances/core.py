@@ -3,12 +3,7 @@ import os
 import bottle
 
 
-bottle.TEMPLATE_PATH.remove('./views/')
-bottle.TEMPLATE_PATH.append('./finances/views')
-
 app = bottle.Bottle()
-app.config['secret_key'] = os.urandom(40)
-app.config['database'] = 'finances.db'
 
 get = lambda name: bottle.request.params.get(name)
 
