@@ -1,3 +1,7 @@
+import re
+import datetime
+
+import peewee
 
 from bottle import view
 from bottle import error
@@ -9,29 +13,56 @@ from .core import get
 from .core import set_cookie
 from .core import delete_cookie
 from .core import login_required
+
 from .models import User
+from .models import Type
+from .models import Transaction
 
 
 @app.route('/')
 def index():
-    redirect('/spending')
+    redirect('/expenses')
 
 
-@app.route('/spending')
-@view('spending')
+@app.route('/expenses', method=['GET'])
+@view('expenses')
 @login_required
-def spending():
-    pass
+def expenses(user):
+    return {
+        'expenses': user.transactions.where(
+            Transaction.type == Type.get(name='Расход')
+        ).order_by(Transaction.date.desc(), Transaction.id.desc())
+    }
+
+
+@app.route('/expenses/add', method=['POST'])
+@login_required
+def expenses_delete(user):
+    Transaction.create(
+        user=user,
+        type=Type.get(name='Расход'),
+        category=get('category'),
+        date=get('date') if get('date') else datetime.date.today(),
+        value=get('value'),
+        description=get('description'),
+    )
+    redirect('/expenses')
+
+
+@app.route('/expenses/remove/<expense_id>', method=['GET'])
+@login_required
+def expenses_delete(user, expense_id):
+    Transaction.delete_user_transaction(user, expense_id)
+    redirect('/expenses')
 
 
 @app.route('/incoming')
-@view('incoming')
 @login_required
-def incoming():
-    pass
+def incoming(user):
+    return 'В разработке...'
 
 
-def validate_name_pass_form(func):
+def validate_name_pass(func):
     def wrapper():
         username = get('username')
         password = get('password')
@@ -40,7 +71,10 @@ def validate_name_pass_form(func):
             return
 
         if len(username) < 6:
-            return {'error': 'Username must be longer than 5 letters'}
+            return {'error': 'Логин должен быть не короче 6 символов'}
+
+        if len(password) < 6:
+            return {'error': 'Пароль должен быть не короче 6 символов'}
 
         return func(username.lower(), password)
     return wrapper
@@ -48,27 +82,42 @@ def validate_name_pass_form(func):
 
 @app.route('/register', method=['GET', 'POST'])
 @view('register')
-@validate_name_pass_form
+@validate_name_pass
 def register(username, password):
+    email = get('email')
+
+    if not email:
+        return
+
+    if not is_valid_email(email):
+        return {'error': 'Некорректный email адрес'}
+
     try:
-        User.register(username, password)
-    except User.RegisterError as exc:
-        return {'error': exc}
+        User.register(username, password, email)
+    except peewee.IntegrityError as exc:
+        if 'UNIQUE constraint failed' not in str(exc):
+            raise
+
+        return {
+            'error': 'Пользователь с таким именем или email`ом уже существует'
+        }
 
     set_cookie('username', username)
     redirect('/')
 
 
+def is_valid_email(email):
+    return bool(re.search('.+@.+\..+', email))
+
+
 @app.route('/login', method=['GET', 'POST'])
 @view('login')
-@validate_name_pass_form
+@validate_name_pass
 def login(username, password):
     try:
         User.auth(username, password)
-    except User.DoesNotExist:
-        return {'error': 'User with that name does not exists!'}
-    except User.AuthError as exc:
-        return {'error': exc}
+    except User.DoesNotExist as exc:
+        return {'error': 'Неверное имя пользователя или пароль'}
 
     set_cookie('username', username)
     redirect('/')

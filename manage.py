@@ -48,11 +48,39 @@ def init(silently, remove):
 
     for model in [
         models.User,
+        models.Type,
         models.Category,
-        models.SubCategory,
         models.Transaction,
     ]:
         model.create_table(silently)
+
+    for type_name in [
+        'Расход',
+        'Доход',
+    ]:
+        try:
+            models.Type.get(name=type_name)
+        except models.Type.DoesNotExist:
+            models.Type.create(name=type_name)
+
+    for category_name in [
+        'Другое',
+        'Жилье',
+        'Учеба',
+        'Продукты',
+        'Техника',
+        'Алкоголь',
+        'Сладкое',
+        'Развлечения',
+        'Одежда',
+        'Транспорт',
+    ]:
+        try:
+            models.Category.get(name=category_name)
+        except models.Category.DoesNotExist:
+            models.Category.create(name=category_name)
+
+    models.User.register(name='admin1', password='111111', email='')
 
 
 @cli.command()
@@ -67,7 +95,7 @@ def run():
 def test():
     os.system(
         r'nosetests --cover-package=finances'
-        r'--cover-erase --with-coverage --with-doctest'
+        r' --cover-erase --with-coverage --with-doctest'
     )
 
 

@@ -11,21 +11,19 @@
     <link rel="icon" type="image/png" href="/img/favicon.png">
 </head>
 
-<body id="index" class="home">
+<body>
 
 <header id="banner" class="body">
-    <h1><a href="/">Finances <strong>Храни и умножай.</strong></a></h1>
+    <h1><a href="/">Finances <strong>Храни и умножай (v0.2)</strong></a></h1>
     <nav>
         <ul>
-            <li><a href="/about">About</a></li>
         % if username:
-            <li><a href="/profile">Profile</a></li>
-            <li><a href="/logout">Logout</a></li>
-            <li><a href="/spending">Spending</a></li>
-            <li><a href="/incoming">Incoming</a></li>
+            <li><a href="/logout">Выйти</a></li>
+            <li><a href="/incoming">Доходы</a></li>
+            <li><a href="/expenses">Траты</a></li>
         % else:
-            <li><a href="/login">Login</a></li>
-            <li><a href="/register">Register</a></li>
+            <li><a href="/register">Создать</a></li>
+            <li><a href="/login">Войти</a></li>
         % end
         </ul>
     </nav>
@@ -33,6 +31,7 @@
 
 <aside id="featured" class="body">
     {{ !base }}
+    % include('error.html')
 </aside>
 
 <a href="https://github.com/afonasev/finances">
