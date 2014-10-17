@@ -1,18 +1,19 @@
+import re
 import hashlib
 
 import bottle
 
+from . import app
 
-app = bottle.Bottle()
 
-get = lambda name: bottle.request.params.getunicode(name)
+get_param = lambda name: bottle.request.params.getunicode(name)
 
 get_cookie = lambda name: bottle.request.get_cookie(
-    name, secret=app.config['secret_key']
+    name, secret=app.config['SECRET_KEY']
 )
 
 set_cookie = lambda name, val: bottle.response.set_cookie(
-    name, val, secret=app.config['secret_key']
+    name, val, secret=app.config['SECRET_KEY']
 )
 
 delete_cookie = lambda name: bottle.response.delete_cookie(name)
@@ -21,17 +22,14 @@ delete_cookie = lambda name: bottle.response.delete_cookie(name)
 def login_required(func):
     def wrapper(*args, **kwargs):
         from . import User
-        username = get_cookie('username')
+        user_id = get_cookie('user_id')
 
-        if not username:
+        if not user_id:
             bottle.redirect('/login')
 
         try:
-            user = User.get(name=username)
+            user = User.get(id=user_id)
         except User.DoesNotExist:
-            user = None
-
-        if not user:
             bottle.redirect('/login')
 
         return func(user, *args, **kwargs)
@@ -40,3 +38,7 @@ def login_required(func):
 
 def get_hash(text):
     return hashlib.sha224(text.encode()).hexdigest()
+
+
+def is_valid_email(email):
+    return bool(re.search('.+@.+\..+', email))

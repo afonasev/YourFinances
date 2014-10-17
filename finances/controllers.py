@@ -1,5 +1,4 @@
 import re
-import datetime
 
 import peewee
 
@@ -8,130 +7,121 @@ from bottle import error
 from bottle import redirect
 from bottle import static_file
 
-from .core import app
-from .core import get
-from .core import set_cookie
-from .core import delete_cookie
-from .core import login_required
+from . import app
+
+from .utils import get_param
+from .utils import set_cookie
+from .utils import delete_cookie
+from .utils import is_valid_email
+from .utils import login_required
 
 from .models import User
-from .models import Type
-from .models import Transaction
 
 
 @app.route('/')
 def index():
-    redirect('/expenses')
+    redirect('/accounts')
 
 
-@app.route('/expenses', method=['GET'])
-@view('expenses')
+@app.route('/accounts')
+@view('accounts')
 @login_required
-def expenses(user):
-    return {
-        'expenses': user.transactions.where(
-            Transaction.type == Type.get(name='Расход')
-        ).order_by(Transaction.date.desc(), Transaction.id.desc())
-    }
+def accounts(user):
+    # return {'accounts': Account.get_accounts(user)}
+    pass
 
 
-@app.route('/expenses/add', method=['POST'])
-@login_required
-def expenses_delete(user):
-    Transaction.create(
-        user=user,
-        type=Type.get(name='Расход'),
-        category=get('category'),
-        date=get('date') if get('date') else datetime.date.today(),
-        value=get('value'),
-        description=get('description'),
-    )
-    redirect('/expenses')
-
-
-@app.route('/expenses/remove/<expense_id>', method=['GET'])
-@login_required
-def expenses_delete(user, expense_id):
-    Transaction.delete_user_transaction(user, expense_id)
-    redirect('/expenses')
-
-
-@app.route('/incoming')
-@login_required
-def incoming(user):
-    return 'В разработке...'
-
-
-def validate_name_pass(func):
-    def wrapper():
-        username = get('username')
-        password = get('password')
-
-        if not username or not password:
-            return
-
-        if len(username) < 6:
-            return {'error': 'Логин должен быть не короче 6 символов'}
-
-        if len(password) < 6:
-            return {'error': 'Пароль должен быть не короче 6 символов'}
-
-        return func(username.lower(), password)
-    return wrapper
-
-
-@app.route('/register', method=['GET', 'POST'])
+@app.route('/register', method=['GET'])
 @view('register')
-@validate_name_pass
-def register(username, password):
-    email = get('email')
+def register():
+    pass
+
+
+@app.route('/register', method=['POST'])
+@view('register')
+def _register():
+    email = get_param('email')
+    password = get_param('password')
+
+    errors = []
 
     if not email:
-        return
+        errors.append('Email empty')
 
-    if not is_valid_email(email):
-        return {'error': 'Некорректный email адрес'}
+    if not password:
+        errors.append('Password empty')
+
+    if email and not is_valid_email(email):
+        errors.append('Invalid email')
+
+    if password:
+        if len(password) < 6:
+            errors.append(
+                'Length of password must be greater than 5 letters'
+            )
+
+        if re.match('\d+', password):
+            errors.append('The password should contain numbers')
+
+        if re.match('\w+', password):
+            errors.append('The password should contain letters')
+
+    if errors:
+        return {'errors': errors}
 
     try:
-        User.register(username, password, email)
+        user = User.register(email, password)
     except peewee.IntegrityError as exc:
         if 'UNIQUE constraint failed' not in str(exc):
             raise
 
-        return {
-            'error': 'Пользователь с таким именем или email`ом уже существует'
-        }
+        return {'errors': ['User with this email already exists']}
 
-    set_cookie('username', username)
+    set_cookie('user_id', user.id)
     redirect('/')
 
 
-def is_valid_email(email):
-    return bool(re.search('.+@.+\..+', email))
-
-
-@app.route('/login', method=['GET', 'POST'])
+@app.route('/login', method=['GET'])
 @view('login')
-@validate_name_pass
-def login(username, password):
-    try:
-        User.auth(username, password)
-    except User.DoesNotExist as exc:
-        return {'error': 'Неверное имя пользователя или пароль'}
+def login():
+    pass
 
-    set_cookie('username', username)
+
+@app.route('/login', method=['POST'])
+@view('login')
+def _login():
+    email = get_param('email')
+    password = get_param('password')
+
+    errors = []
+
+    if not email:
+        errors.append('Email empty')
+
+    if not password:
+        errors.append('Password empty')
+
+    if errors:
+        return {'errors': errors}
+
+    try:
+        user = User.auth(email, password)
+    except User.DoesNotExist:
+        return {'errors': ['Wrong email or password']}
+
+    set_cookie('user_id', user.id)
     redirect('/')
 
 
 @app.route('/logout')
 def logout():
-    delete_cookie('username')
+    delete_cookie('user_id')
     redirect('/login')
 
 
 @app.route('/<filetype>/<filepath>')
-def static(filepath, filetype=None):
-    return static_file(filepath, root=app.config['static_path'] + filetype)
+def static(filetype, filepath):
+    return static_file(filepath, root=app.config['STATIC_PATH'] + filetype)
 
 
 @error(403)

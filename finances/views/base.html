@@ -1,44 +1,71 @@
 <!DOCTYPE html>
 
-% from finances.core import *
-% username = get_cookie('username')
+% from finances.utils import *
+% from finances.models import User
+% user_id = get_cookie('user_id')
 
 <html lang="ru">
 <head>
-    <meta charset="utf-8">
-    <title>Finances</title>
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="icon" type="image/png" href="/img/favicon.png">
+  <meta charset="utf-8">
+  <title>Finances</title>
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+
+  <style type="text/css">
+    body {
+      padding: 80px;
+    }
+    footer {
+      text-align: center;
+      padding: 10px 0 0 100px;
+    }
+    .navbar {
+      z-index: 0;
+    }
+  </style>
 </head>
 
 <body>
 
-<header id="banner" class="body">
-    <h1><a href="/">Finances <strong>Храни и умножай (v0.2)</strong></a></h1>
-    <nav>
-        <ul>
-        % if username:
-            <li><a href="/logout">Выйти</a></li>
-            <li><a href="/incoming">Доходы</a></li>
-            <li><a href="/expenses">Траты</a></li>
-        % else:
-            <li><a href="/register">Создать</a></li>
-            <li><a href="/login">Войти</a></li>
-        % end
+<header>
+  <nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <a href="/" class="navbar-brand">Finances</a>
+      </div>
+      <div class="navbar-collapse collapse" id="navbar-main">
+        <ul class="nav navbar-nav">
+          % if user_id and User.get(id=user_id):
+            <li>
+              <a href="/accounts">Accounts</a>
+            </li>
+           <li>
+              <a href="/logout">Logout</a>
+            </li>
+          % else:
+            <li>
+              <a href="/login">Login</a>
+            </li>
+            <li>
+              <a href="/register">Sign Up</a>
+            </li>
+          % end
         </ul>
-    </nav>
+      </div>
+    </div>
+  </nav>
 </header>
 
-<aside id="featured" class="body">
-    {{ !base }}
-    % include('error.html')
-</aside>
+<article class="well bs-component">
+  {{ !base }}
+  % include('error.html')
+</article>
 
 <a href="https://github.com/afonasev/finances">
-<img style="position: absolute; top: 0; right: 0; border: 0;"
-     src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67"
-     alt="Fork me on GitHub"
-     data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+<img style="position: absolute; top: 0; right: 0; border: 0"
+  src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67"
+  alt="Fork me on GitHub"
+  data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
 
 </body>
 </html>

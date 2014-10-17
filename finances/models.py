@@ -1,22 +1,13 @@
-import datetime
 
-import peewee
+import peewee as pw
 
-from peewee import IntegerField
-from peewee import FloatField
-from peewee import CharField
-from peewee import TextField
-from peewee import DateField
-from peewee import DateTimeField
-from peewee import ForeignKeyField
-
-from .core import get_hash
+from .utils import get_hash
 
 
-database = peewee.Proxy()
+database = pw.Proxy()
 
 
-class BaseModel(peewee.Model):
+class BaseModel(pw.Model):
     @classmethod
     def check(cls, *args, **kwargs):
         try:
@@ -34,61 +25,20 @@ class BaseModel(peewee.Model):
 
 
 class User(BaseModel):
-    id = IntegerField(primary_key=True)
-    name = CharField(unique=True)
-    email = CharField(unique=True)
-    password = CharField()
-    join_date = DateTimeField(default=datetime.datetime.now)
+    id = pw.IntegerField(primary_key=True)
+    email = pw.CharField(unique=True)
+    password = pw.CharField()
 
     @classmethod
-    def auth(cls, name, password):
-        return User.get(name=name, password=get_hash(password))
+    def auth(cls, email, password):
+        return User.get(email=email, password=get_hash(password))
 
     @classmethod
-    def register(cls, name, password, email):
-        return User.create(name=name, email=email, password=get_hash(password))
+    def register(cls, email, password):
+        return User.create(email=email, password=get_hash(password))
 
     def __repr__(self):
-        return '<User %r>' % self.name
+        return '<User %r>' % self.email
 
     class Meta:
-        order_by = ('name',)
-
-
-class _List(BaseModel):
-    id = IntegerField(primary_key=True)
-    name = CharField(unique=True)
-
-    def __repr__(self):
-        return '<%s %r>' % (self.__class__.__name__, self.name)
-
-
-class Type(_List):
-    pass
-
-
-class Category(_List):
-    pass
-
-
-class Transaction(BaseModel):
-    id = IntegerField(primary_key=True)
-    user = ForeignKeyField(User, related_name='transactions')
-    type = ForeignKeyField(Type, related_name='transactions')
-    date = DateField(default=datetime.date.today())
-    category = ForeignKeyField(Category, related_name='transactions')
-    value = FloatField()
-    description = TextField(null=True)
-
-    @classmethod
-    def delete_user_transaction(cls, user, transaction_id):
-        transaction = Transaction.get(id=transaction_id)
-
-        if transaction.user == user:
-            transaction.delete_instance()
-            return True
-
-        return False
-
-    class Meta:
-        order_by = ('-date',)
+        order_by = ('email',)
