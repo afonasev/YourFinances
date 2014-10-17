@@ -25,7 +25,6 @@ class BaseModel(pw.Model):
 
 
 class User(BaseModel):
-    id = pw.IntegerField(primary_key=True)
     email = pw.CharField(unique=True)
     password = pw.CharField()
 
@@ -38,7 +37,7 @@ class User(BaseModel):
         return User.create(email=email, password=get_hash(password))
 
     def __repr__(self):
-        return '<User %r>' % self.email
+        return '<User %r %r>' % (self.id, self.email)
 
     class Meta:
         order_by = ('email',)

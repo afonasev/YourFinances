@@ -7,4 +7,5 @@ click
 
 # requirements for tests
 nose
+webtest
 coverage

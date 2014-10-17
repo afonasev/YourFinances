@@ -1,5 +1,5 @@
 #Finances
-v0.3.0 [![Build Status](https://drone.io/github.com/Afonasev/Finances/status.png)](https://drone.io/github.com/Afonasev/Finances/latest)
+v0.3.1 [![Build Status](https://drone.io/github.com/Afonasev/Finances/status.png)](https://drone.io/github.com/Afonasev/Finances/latest)
 
 ####Description
 ... not yet done ...

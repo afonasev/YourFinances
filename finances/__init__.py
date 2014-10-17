@@ -6,7 +6,7 @@ import peewee
 app = bottle.Bottle()
 
 try:
-    import config
+    import finances_config as config
 except ImportError:
     import example_config as config
 

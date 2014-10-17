@@ -42,3 +42,18 @@ def get_hash(text):
 
 def is_valid_email(email):
     return bool(re.search('.+@.+\..+', email))
+
+
+def get_email_pass():
+    email = get_param('email')
+    password = get_param('password')
+
+    errors = []
+
+    if not email:
+        errors.append('Email is empty')
+
+    if not password:
+        errors.append('Password is empty')
+
+    return email, password, errors

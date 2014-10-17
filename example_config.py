@@ -1,4 +1,4 @@
-# make config.py with your parameters
+# make finances_config.py with your parameters
 import os
 
 
