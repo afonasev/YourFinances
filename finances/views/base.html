@@ -70,17 +70,9 @@
 <article>
   {{ !base }}
 
-  % if defined('errors'):
+  % if defined('error'):
     <section class="well bs-component">
-        % if isinstance(get('errors'), str):
-          % include('error.html', error=get('errors'))
-
-        % else:
-          % for error in get('errors'):
-            % include('error.html', error=error)
-          % end
-
-        % end
+        % include('error.html', error=get('error'))
     </section>
   % end
 

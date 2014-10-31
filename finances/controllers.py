@@ -6,7 +6,7 @@ from bottle import view, redirect
 from . import app
 from . import utils
 from .models import User, Account
-from .utils import login_required
+from .utils import login_required, errors_handler
 
 
 @app.get('/')
@@ -18,55 +18,39 @@ def index():
 @view('account/list')
 @login_required
 def account_list(user):
-    is_personal = utils.get_param('is_personal')
+    res = {}
+
+    is_personal = utils.get('is_personal')
     if is_personal is not None:
-        return {'is_personal': bool(int(is_personal))}
+        res['is_personal'] = bool(int(is_personal))
+
+    return res
 
 
 @app.post('/account')
 @view('account/list')
 @login_required
+@errors_handler
 def account_create(user):
-    name = utils.get_param('name')
-    is_personal = bool(utils.get_param('is_personal'))
-
-    errors = []
-
-    if not name:
-        errors.append('Account name is empty')
-
-    elif len(name) < 6:
-        errors.append(
-            'Length of account name must be greater than 5 letters'
-        )
-
-    if errors:
-        return {'errors': errors}
-
-    try:
-        Account.reg(owner=user, name=name, is_personal=is_personal)
-    except Account.UniqueError:
-        return {'errors': ['Account with this name already exists']}
+    Account.reg(
+        owner=user,
+        name=utils.get('name'),
+        is_personal=utils.get('is_personal') or False,
+    )
 
 
 @app.post('/account/<name>')
 @view('account/list')
 @login_required
+@errors_handler
 def account(user, name):
     account = Account.get(name=name, owner=user)
-    errors = []
 
-    new_name = utils.get_param('name')
+    if utils.get('name'):
+        account.name = utils.get('name')
 
-    if new_name:
-        if len(new_name) < 6:
-            return {'errors': 'Account name is empty'}
-        account.name = new_name
-
-    balance = utils.get_param('balance')
-
-    if balance is not None:
-        account.balance = balance
+    if utils.get('balance') is not None:
+        account.balance = utils.get('balance')
 
     account.save()
     redirect('/account')
@@ -87,23 +71,9 @@ def register():
 
 @app.post('/register')
 @view('auth/register')
+@errors_handler
 def register_do():
-    email, password, errors = utils.get_email_pass()
-
-    if email:
-        errors.extend(utils.validate_email(email))
-
-    if password:
-        errors.extend(utils.validate_password(password))
-
-    if errors:
-        return {'errors': errors}
-
-    try:
-        user = User.reg(email, password)
-    except User.UniqueError:
-        return {'errors': ['User with this email already exists']}
-
+    user = User.reg(utils.get('email'), utils.get('password'))
     utils.set_cookie('user_id', user.id)
     redirect('/')
 
@@ -116,17 +86,9 @@ def login():
 
 @app.post('/login')
 @view('auth/login')
+@errors_handler
 def login_do():
-    email, password, errors = utils.get_email_pass()
-
-    if errors:
-        return {'errors': errors}
-
-    try:
-        user = User.auth(email, password)
-    except User.DoesNotExist:
-        return {'errors': ['Wrong email or password']}
-
+    user = User.auth(utils.get('email'), utils.get('password'))
     utils.set_cookie('user_id', user.id)
     redirect('/')
 

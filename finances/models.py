@@ -1,7 +1,8 @@
 
 import peewee as pw
 
-from .utils import get_hash
+from . import validators
+from .utils import get_hash, ApplicationError
 
 
 database = pw.Proxy()
@@ -21,7 +22,10 @@ class BaseModel(pw.Model):
     def __repr__(self):
         return '<%s %r>' % (self.__class__.__name__, self.id)
 
-    class UniqueError(Exception):
+    class UniqueError(ApplicationError):
+        pass
+
+    class ValidationError(ApplicationError):
         pass
 
     class Meta:
@@ -33,17 +37,28 @@ class User(BaseModel):
     password = pw.CharField()
 
     @classmethod
+    @validators.email_pass_empty
     def auth(cls, email, password):
+        if not User._check(email=email, password=password):
+            raise cls.AuthError('Wrong email or password')
         return User.get(email=email, password=get_hash(password))
 
     @classmethod
+    @validators.email_pass_empty
+    @validators.email_pass_correct
     def reg(cls, email, password):
         if User._check(email=email):
-            raise cls.UniqueError
+            raise cls.RegError('User with this email already exists')
         return User.create(email=email, password=get_hash(password))
 
     def __repr__(self):
         return '<User %r %r>' % (self.id, self.email)
+
+    class AuthError(ApplicationError):
+        pass
+
+    class RegError(ApplicationError):
+        pass
 
 
 class Account(BaseModel):
@@ -54,8 +69,11 @@ class Account(BaseModel):
 
     @classmethod
     def reg(cls, owner, name, is_personal):
+        if not name:
+            cls.ValidationError('Account name is empty')
+
         if Account._check(owner=owner, name=name):
-            raise cls.UniqueError
+            raise cls.UniqueError('Account with this name already exists')
         return Account.create(owner=owner, name=name, is_personal=is_personal)
 
     def __repr__(self):
