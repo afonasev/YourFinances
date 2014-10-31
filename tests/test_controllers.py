@@ -3,7 +3,7 @@ import unittest
 import peewee
 import webtest
 
-from finances import app
+import finances
 from finances import models
 
 
@@ -14,12 +14,10 @@ class TestCase(unittest.TestCase):
     def setUp(self):
         models.database.initialize(peewee.SqliteDatabase(':memory:'))
 
-        for model in [
-            models.User,
-        ]:
-            model.create_table()
+        from manage import init_db
+        init_db()
 
-        self.app = webtest.TestApp(app)
+        self.app = webtest.TestApp(finances.app)
 
     def test_not_found_page(self):
         self.assertRaises(webtest.app.AppError, self.app.get, '/smt_page')
@@ -40,7 +38,7 @@ class TestCase(unittest.TestCase):
             'email': 'invalid_email',
             'password': self.test_password,
         }).text
-        self.assertIn('Invalid email', answer_page)
+        self.assertIn('Email is not valid', answer_page)
 
         # Test: length of password must be greater than 5 letters
         answer_page = self.app.post(url, {
@@ -68,9 +66,9 @@ class TestCase(unittest.TestCase):
             'email': self.test_email,
             'password': self.test_password,
         }).text
-        self.assertTrue(models.User.check(email=self.test_email))
+        self.assertTrue(models.User._check(email=self.test_email))
 
-        # Test: try create duplicate user
+        # Test: try register duplicate user
         answer_page = self.app.post(url, {
             'email': self.test_email,
             'password': self.test_password,
@@ -116,7 +114,7 @@ class TestCase(unittest.TestCase):
         }).text
         self.assertIn('Wrong email or password', answer_page)
 
-        models.User.register(
+        models.User.reg(
             email=self.test_email,
             password=self.test_password,
         )
@@ -130,7 +128,7 @@ class TestCase(unittest.TestCase):
         self.assertTrue(self.app.cookies.get('user_id'))
 
     def test_logout(self):
-        models.User.register(
+        models.User.reg(
             email=self.test_email,
             password=self.test_password,
         )

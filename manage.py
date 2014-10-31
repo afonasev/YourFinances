@@ -29,21 +29,16 @@ def test():
 @click.option('--silently', '-s', is_flag=True)
 def init(silently):
     click.secho("Init database done", fg='green')
+    init_db(silently)
 
+
+def init_db(silently=False):
     models = finances.models
     for model in [
         models.User,
+        models.Account,
     ]:
         model.create_table(silently)
-
-    # for type_name in [
-    #     'Расход',
-    #     'Доход',
-    # ]:
-    #     try:
-    #         models.Type.get(name=type_name)
-    #     except models.Type.DoesNotExist:
-    #         models.Type.create(name=type_name)
 
 
 if __name__ == '__main__':

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- SQL XML created by WWW SQL Designer, http://code.google.com/p/wwwsqldesigner/ -->
+<!-- Active URL: http://ondras.zarovi.cz/sql/demo/ -->
+<sql>
+<datatypes db="sqlite">
+    <group label="Affinity">
+        <type label="Text" default="" length="1" sql="TEXT" quote="'" color="rgb(255,200,200)"/>
+        <type label="Numeric" default="0" length="0" sql="NUMERIC" quote="" color="rgb(238,238,170)"/>
+        <type label="Integer" default="0" length="0" sql="INTEGER" quote="" color="rgb(238,238,170)"/>
+        <type label="Real" default="0" length="0" sql="REAL" quote="" color="rgb(238,238,170)"/>
+        <type label="None" default="" length="0" sql="NONE" quote="" color="rgb(200,255,200)"/>
+    </group>
+</datatypes><table x="149" y="302" name="user">
+<row name="id" null="1" autoincrement="1">
+<datatype>TEXT</datatype>
+<default>NULL</default></row>
+<row name="email" null="1" autoincrement="0">
+<datatype>TEXT</datatype>
+<default>NULL</default></row>
+<row name="passhash" null="1" autoincrement="0">
+<datatype>TEXT</datatype>
+<default>NULL</default></row>
+<key type="PRIMARY" name="">
+<part>id</part>
+</key>
+</table>
+<table x="351" y="299" name="account">
+<row name="id" null="1" autoincrement="1">
+<datatype>TEXT</datatype>
+<default>NULL</default></row>
+<row name="name" null="1" autoincrement="0">
+<datatype>TEXT</datatype>
+<default>NULL</default></row>
+<row name="owner" null="1" autoincrement="0">
+<datatype>TEXT</datatype>
+<default>NULL</default><relation table="user" row="id" />
+</row>
+<row name="balance" null="1" autoincrement="0">
+<datatype>REAL</datatype>
+<default>NULL</default></row>
+<row name="is_personal" null="1" autoincrement="0">
+<datatype>REAL</datatype>
+<default>NULL</default></row>
+<key type="PRIMARY" name="">
+<part>id</part>
+</key>
+</table>
+<table x="103" y="101" name="transaction">
+<row name="id" null="1" autoincrement="1">
+<datatype>TEXT</datatype>
+<default>NULL</default></row>
+<row name="from" null="1" autoincrement="0">
+<datatype>TEXT</datatype>
+<default>NULL</default><relation table="account" row="id" />
+</row>
+<row name="to" null="1" autoincrement="0">
+<datatype>TEXT</datatype>
+<default>NULL</default><relation table="account" row="id" />
+</row>
+<row name="amount" null="1" autoincrement="0">
+<datatype>TEXT</datatype>
+<default>NULL</default></row>
+<row name="description" null="1" autoincrement="0">
+<datatype>TEXT</datatype>
+<default>NULL</default></row>
+<key type="PRIMARY" name="">
+<part>id</part>
+</key>
+</table>
+<table x="350" y="101" name="loan">
+<row name="id" null="1" autoincrement="1">
+<datatype>TEXT</datatype>
+<default>NULL</default></row>
+<row name="transaction" null="1" autoincrement="0">
+<datatype>TEXT</datatype>
+<default>NULL</default><relation table="transaction" row="id" />
+</row>
+<row name="start_date" null="1" autoincrement="0">
+<datatype>NONE</datatype>
+<default>NULL</default></row>
+<row name="end_date" null="1" autoincrement="0">
+<datatype>NONE</datatype>
+<default>NULL</default></row>
+<row name="overpayment" null="1" autoincrement="0">
+<datatype>NUMERIC</datatype>
+<default>NULL</default></row>
+<key type="PRIMARY" name="">
+<part>id</part>
+</key>
+</table>
+</sql>

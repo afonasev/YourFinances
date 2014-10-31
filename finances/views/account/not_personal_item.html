@@ -1,0 +1,32 @@
+% type = 'default'
+<div class="panel panel-{{ type }}">
+  <div class="panel-heading" style="padding: 5px;">
+    <h3 class="panel-title">{{ account.name }}</h3>
+  </div>
+  <div class="panel-body" style="padding: 5px;">
+    <table width="100%" align="center">
+      <tr>
+
+        <td>
+          <form action="/account/{{ account.name }}" method="POST" class="form-horizontal">
+            <input name="name" type="text" class="input-sm" value="{{ account.name }}" style="color: gray;">
+            <button type="submit" class="btn-xs btn-{{ type }}">Set name</button>
+          </form>
+        </td>
+
+        <td>
+        </td>
+
+        <td>
+          <b>Count of transactions:</b> ???
+        </td>
+
+        <td>
+          <a href="/account/delete/{{ account.name }}"
+             class="btn-xs btn-danger"> DROP </a>
+        </td>
+
+      </tr>
+    </table>
+  </div>
+</div>

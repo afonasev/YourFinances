@@ -1,88 +1,123 @@
-import re
 
-import peewee
+import bottle
 
-from bottle import view
-from bottle import error
-from bottle import redirect
-from bottle import static_file
+from bottle import view, redirect
 
 from . import app
-
-from .utils import set_cookie
-from .utils import delete_cookie
-from .utils import get_email_pass
-from .utils import is_valid_email
+from . import utils
+from .models import User, Account
 from .utils import login_required
 
-from .models import User
 
-
-@app.route('/')
+@app.get('/')
 def index():
-    redirect('/accounts')
+    redirect('/account')
 
 
-@app.route('/accounts')
-@view('accounts')
+@app.get('/account')
+@view('account/list')
 @login_required
-def accounts(user):
-    pass
+def account_list(user):
+    is_personal = utils.get_param('is_personal')
+    if is_personal is not None:
+        return {'is_personal': bool(int(is_personal))}
 
 
-@app.route('/register', method=['GET'])
-@view('register')
-def register():
-    pass
+@app.post('/account')
+@view('account/list')
+@login_required
+def account_create(user):
+    name = utils.get_param('name')
+    is_personal = bool(utils.get_param('is_personal'))
 
+    errors = []
 
-@app.route('/register', method=['POST'])
-@view('register')
-def _register():
-    email, password, errors = get_email_pass()
+    if not name:
+        errors.append('Account name is empty')
 
-    if email and not is_valid_email(email):
-        errors.append('Invalid email')
-
-    if password:
-        if len(password) < 6:
-            errors.append(
-                'Length of password must be greater than 5 letters'
-            )
-
-        if not re.search('\d+', password):
-            errors.append('The password should contain numbers')
-
-        if not re.search('[a-zA-Z]+', password):
-            errors.append('The password should contain letters')
+    elif len(name) < 6:
+        errors.append(
+            'Length of account name must be greater than 5 letters'
+        )
 
     if errors:
         return {'errors': errors}
 
     try:
-        user = User.register(email, password)
-    except peewee.IntegrityError as exc:
-        if 'email is not unique' in str(exc):
-            return {'errors': ['User with this email already exists']}
-        raise
+        Account.reg(owner=user, name=name, is_personal=is_personal)
+    except Account.UniqueError:
+        return {'errors': ['Account with this name already exists']}
 
-    except Exception as exc:
-        print(exc)
 
-    set_cookie('user_id', user.id)
+@app.post('/account/<name>')
+@view('account/list')
+@login_required
+def account(user, name):
+    account = Account.get(name=name, owner=user)
+    errors = []
+
+    new_name = utils.get_param('name')
+
+    if new_name:
+        if len(new_name) < 6:
+            return {'errors': 'Account name is empty'}
+        account.name = new_name
+
+    balance = utils.get_param('balance')
+
+    if balance is not None:
+        account.balance = balance
+
+    account.save()
+    redirect('/account')
+
+
+@app.get('/account/delete/<name>')
+@login_required
+def account_delete(user, name):
+    Account.get(name=name, owner=user).delete_instance()
+    redirect('/account')
+
+
+@app.get('/register')
+@view('auth/register')
+def register():
+    pass
+
+
+@app.post('/register')
+@view('auth/register')
+def register_do():
+    email, password, errors = utils.get_email_pass()
+
+    if email:
+        errors.extend(utils.validate_email(email))
+
+    if password:
+        errors.extend(utils.validate_password(password))
+
+    if errors:
+        return {'errors': errors}
+
+    try:
+        user = User.reg(email, password)
+    except User.UniqueError:
+        return {'errors': ['User with this email already exists']}
+
+    utils.set_cookie('user_id', user.id)
     redirect('/')
 
 
-@app.route('/login', method=['GET'])
-@view('login')
+@app.get('/login')
+@view('auth/login')
 def login():
     pass
 
 
-@app.route('/login', method=['POST'])
-@view('login')
-def _login():
-    email, password, errors = get_email_pass()
+@app.post('/login')
+@view('auth/login')
+def login_do():
+    email, password, errors = utils.get_email_pass()
 
     if errors:
         return {'errors': errors}
@@ -92,26 +127,28 @@ def _login():
     except User.DoesNotExist:
         return {'errors': ['Wrong email or password']}
 
-    set_cookie('user_id', user.id)
+    utils.set_cookie('user_id', user.id)
     redirect('/')
 
 
-@app.route('/logout')
+@app.get('/logout')
 def logout():
-    delete_cookie('user_id')
+    utils.delete_cookie('user_id')
     redirect('/login')
 
 
-@app.route('/<filetype>/<filepath>')
+@app.get('/<filetype>/<filepath>')
 def static(filetype, filepath):
-    return static_file(filepath, root=app.config['STATIC_PATH'] + filetype)
+    return bottle.static_file(
+        filepath, root=app.config['STATIC_PATH'] + filetype
+    )
 
 
-@error(403)
+@bottle.error(403)
 def mistake403(code):
     return 'The parameter you passed has the wrong format! ERROR %r' % code
 
 
-@error(404)
+@bottle.error(404)
 def mistake404(code):
     return 'Sorry, this page does not exist! ERROR %r' % code

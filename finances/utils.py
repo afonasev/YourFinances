@@ -1,4 +1,5 @@
 import re
+import base64
 import hashlib
 
 import bottle
@@ -32,16 +33,15 @@ def login_required(func):
         except User.DoesNotExist:
             bottle.redirect('/login')
 
-        return func(user, *args, **kwargs)
+        res = func(user, *args, **kwargs) or {}
+        res['user'] = user
+
+        return res
     return wrapper
 
 
 def get_hash(text):
-    return hashlib.sha224(text.encode()).hexdigest()
-
-
-def is_valid_email(email):
-    return bool(re.search('.+@.+\..+', email))
+    return base64.b64encode((hashlib.sha256(text.encode()).digest()))
 
 
 def get_email_pass():
@@ -57,3 +57,29 @@ def get_email_pass():
         errors.append('Password is empty')
 
     return email, password, errors
+
+
+def validate_email(email):
+    errors = []
+
+    if not bool(re.search('.+@.+\..+', email)):
+        errors.append('Email is not valid')
+
+    return errors
+
+
+def validate_password(password):
+    errors = []
+
+    if len(password) < 6:
+        errors.append(
+            'Length of password must be greater than 5 letters'
+        )
+
+    if not re.search('\d+', password):
+        errors.append('The password should contain numbers')
+
+    if not re.search('[a-zA-Z]+', password):
+        errors.append('The password should contain letters')
+
+    return errors

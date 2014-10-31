@@ -1,0 +1,36 @@
+% rebase('base.html')
+
+%  if defined('is_personal'):
+%    from finances.models import Account
+%    accounts = user.accounts.where(Account.is_personal == get('is_personal'))
+%  else:
+%    accounts = user.accounts
+%  end
+
+%  for account in accounts:
+%    if account.is_personal:
+%      include('account/personal_item.html', account=account)
+%    else:
+%      include('account/not_personal_item.html', account=account)
+%    end
+%  end
+
+
+<section class="well bs-component">
+  <form action="/account" method="POST">
+    <legend>Create new account {{get('is_personal')}}</legend>
+
+    <label for="inputText" class="control-label">Name</label>
+    <input name="name" type="text" class="form-control" id="inputText" placeholder="Name">
+
+    <div class="checkbox">
+      <label>
+        <input type="checkbox" name="is_personal" checked> Personal account
+      </label>
+    </div>
+
+    <div class="col-lg-offset-2">
+      <button type="submit" class="btn btn-primary">Create</button>
+    </div>
+  </form>
+</section>
