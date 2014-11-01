@@ -37,6 +37,7 @@ def init_db(silently=False):
     for model in [
         models.User,
         models.Account,
+        models.Transaction,
     ]:
         model.create_table(silently)
 

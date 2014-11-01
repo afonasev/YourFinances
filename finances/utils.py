@@ -11,7 +11,9 @@ class ApplicationError(Exception):
     pass
 
 
-get = lambda name: bottle.request.params.getunicode(name)
+def get(name):
+    val = bottle.request.params.getunicode(name)
+    return val.strip() if val else None
 
 get_cookie = lambda name: bottle.request.get_cookie(
     name, secret=app.config['SECRET_KEY']
@@ -22,6 +24,17 @@ set_cookie = lambda name, val: bottle.response.set_cookie(
 )
 
 del_cookie = lambda name: bottle.response.delete_cookie(name)
+
+
+def redirect_back():
+    referer = bottle.request.headers['referer']
+    host = bottle.request.remote_addr
+
+    if host in referer:
+        route = re.findall(r'//.*?(/.*)', referer)[0]
+        bottle.redirect(route)
+
+    bottle.redirect('/')
 
 
 def errors_handler(func):
@@ -44,8 +57,9 @@ def login_required(func):
         if not user_id:
             bottle.redirect('/login')
 
-        if not User.check(id=user_id):
+        if not User._check(id=user_id):
             bottle.redirect('/login')
+
         user = User.get(id=user_id)
 
         res = func(user, *args, **kwargs) or {}

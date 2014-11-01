@@ -5,8 +5,16 @@ from bottle import view, redirect
 
 from . import app
 from . import utils
-from .models import User, Account
-from .utils import login_required, errors_handler
+from .models import User
+from .models import Account
+from .utils import redirect_back
+from .utils import login_required
+from .utils import errors_handler
+from .utils import ApplicationError
+
+
+class PageNotExist(ApplicationError):
+    pass
 
 
 @app.get('/')
@@ -37,6 +45,7 @@ def account_create(user):
         name=utils.get('name'),
         is_personal=utils.get('is_personal') or False,
     )
+    redirect_back()
 
 
 @app.post('/account/<name>')
@@ -53,14 +62,14 @@ def account(user, name):
         account.balance = utils.get('balance')
 
     account.save()
-    redirect('/account')
+    redirect_back()
 
 
 @app.get('/account/delete/<name>')
 @login_required
 def account_delete(user, name):
     Account.get(name=name, owner=user).delete_instance()
-    redirect('/account')
+    redirect_back()
 
 
 @app.get('/register')
@@ -95,7 +104,7 @@ def login_do():
 
 @app.get('/logout')
 def logout():
-    utils.delete_cookie('user_id')
+    utils.del_cookie('user_id')
     redirect('/login')
 
 
@@ -106,11 +115,8 @@ def static(filetype, filepath):
     )
 
 
-@bottle.error(403)
-def mistake403(code):
-    return 'The parameter you passed has the wrong format! ERROR %r' % code
-
-
-@bottle.error(404)
+@app.error(404)
+@view('error404')
+@errors_handler
 def mistake404(code):
-    return 'Sorry, this page does not exist! ERROR %r' % code
+    raise PageNotExist('Sorry, this page does not exist (404 error)')

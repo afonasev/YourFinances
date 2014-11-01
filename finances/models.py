@@ -1,3 +1,4 @@
+import datetime
 
 import peewee as pw
 
@@ -8,7 +9,7 @@ from .utils import get_hash, ApplicationError
 database = pw.Proxy()
 
 
-class BaseModel(pw.Model):
+class _BaseModel(pw.Model):
 
     @classmethod
     def _check(cls, *args, **kwargs):
@@ -20,7 +21,10 @@ class BaseModel(pw.Model):
             return True
 
     def __repr__(self):
-        return '<%s %r>' % (self.__class__.__name__, self.id)
+        attrs = self.__dict__['_data'].copy()
+        pairs = ['id:%s' % attrs.pop('id')]
+        pairs += ['%s:%s' % (k, v) for k, v in attrs.items()]
+        return '<%s {%s}>' % (self.__class__.__name__, ', '.join(pairs))
 
     class UniqueError(ApplicationError):
         pass
@@ -32,14 +36,14 @@ class BaseModel(pw.Model):
         database = database
 
 
-class User(BaseModel):
+class User(_BaseModel):
     email = pw.CharField()
     password = pw.CharField()
 
     @classmethod
     @validators.email_pass_empty
     def auth(cls, email, password):
-        if not User._check(email=email, password=password):
+        if not User._check(email=email, password=get_hash(password)):
             raise cls.AuthError('Wrong email or password')
         return User.get(email=email, password=get_hash(password))
 
@@ -51,9 +55,6 @@ class User(BaseModel):
             raise cls.RegError('User with this email already exists')
         return User.create(email=email, password=get_hash(password))
 
-    def __repr__(self):
-        return '<User %r %r>' % (self.id, self.email)
-
     class AuthError(ApplicationError):
         pass
 
@@ -61,23 +62,36 @@ class User(BaseModel):
         pass
 
 
-class Account(BaseModel):
+class Account(_BaseModel):
     name = pw.CharField()
     owner = pw.ForeignKeyField(User, related_name='accounts')
-    balance = pw.IntegerField(default=0)
+    balance = pw.FloatField(default=0)
     is_personal = pw.BooleanField(default=False)
+
+    @property
+    def transactions(self):
+        condition = Transaction.source == self or Transaction.target == self
+        return Transaction.select().where(condition)
 
     @classmethod
     def reg(cls, owner, name, is_personal):
         if not name:
-            cls.ValidationError('Account name is empty')
+            raise cls.ValidationError('Account name is empty')
 
         if Account._check(owner=owner, name=name):
             raise cls.UniqueError('Account with this name already exists')
         return Account.create(owner=owner, name=name, is_personal=is_personal)
 
-    def __repr__(self):
-        return '<Account %r %r>' % (self.id, self.name)
-
     class Meta:
         order_by = ('-is_personal', )
+
+
+class Transaction(_BaseModel):
+    source = pw.ForeignKeyField(Account, related_name='subtractions')
+    target = pw.ForeignKeyField(Account, related_name='additions')
+    amount = pw.FloatField()
+    description = pw.CharField()
+    date = pw.DateTimeField(default=datetime.datetime.now)
+
+    class Meta:
+        order_by = ('-date', )

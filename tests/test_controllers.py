@@ -7,7 +7,7 @@ import finances
 from finances import models
 
 
-class TestCase(unittest.TestCase):
+class TestControlles(unittest.TestCase):
     test_email = 'user@mail.com'
     test_password = 'abc456'
 
@@ -38,7 +38,7 @@ class TestCase(unittest.TestCase):
             'email': 'invalid_email',
             'password': self.test_password,
         }).text
-        self.assertIn('Email is not valid', answer_page)
+        self.assertIn('Email is not correct', answer_page)
 
         # Test: length of password must be greater than 5 letters
         answer_page = self.app.post(url, {
@@ -160,11 +160,4 @@ class TestCase(unittest.TestCase):
             'email': self.test_email,
             'password': '',
         }).text
-        self.assertIn('Password is empty', answer_page)
-
-        # Test: email and password is empty
-        answer_page = self.app.post(url, {
-            'email': '', 'password': '',
-        }).text
-        self.assertIn('Email is empty', answer_page)
         self.assertIn('Password is empty', answer_page)
