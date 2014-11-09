@@ -1,0 +1,54 @@
+% from finances.models import Transaction
+
+% transactions = user.transactions.order_by(
+%   Transaction.date.desc()
+% ).limit(15).execute()
+
+% if transactions:
+  <table class="table table-striped table-hover ">
+    <thead>
+      <tr class="warning">
+        <th>Source</th>
+        <th>Target</th>
+        <th>Amount</th>
+        <th>Description</th>
+        <th>Date</th>
+        <th>#</th>
+      </tr>
+    </thead>
+    <tbody>
+    <hr/>
+
+    % for transaction in transactions:
+
+      % desc = transaction.description or ''
+      % if len(desc) > 18:
+        % desc = desc[:18] + '...'
+      % end
+
+      % tr_class = ''
+      % if (
+      %  transaction.source.is_personal and
+      %  not transaction.target.is_personal
+      % ):
+      %   tr_class = 'danger'
+      % elif (
+      %  transaction.target.is_personal and
+      %  not transaction.source.is_personal
+      % ):
+      %   tr_class = 'success'
+      % end
+
+      <tr class='{{tr_class}}'>
+        <th>{{transaction.source.name}}</th>
+        <th>{{transaction.target.name}}</th>
+        <th>{{transaction.amount}}</th>
+        <th title="{{transaction.description or ''}}">{{desc}}</th>
+        <th>{{transaction.date.strftime("%d/%m/%Y")}}</th>
+        <th><a href="/transaction/delete/{{ transaction.id }}" style="color: orange;">Delete</a></th>
+      </tr>
+    % end
+
+    </tbody>
+  </table>
+% end

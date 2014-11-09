@@ -13,7 +13,7 @@ def cli():
 
 @cli.command()
 def run():
-    click.secho('Running server for Finances', fg='green')
+    click.secho("Running server for Finances", fg='green')
     finances.app.run(debug=True, reloader=True)
 
 

@@ -27,7 +27,11 @@ del_cookie = lambda name: bottle.response.delete_cookie(name)
 
 
 def redirect_back():
-    referer = bottle.request.headers['referer']
+    try:
+        referer = bottle.request.headers['referer']
+    except KeyError:
+        bottle.redirect('/')
+
     host = bottle.request.remote_addr
 
     if host in referer:

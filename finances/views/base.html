@@ -11,7 +11,9 @@
 
   <style type="text/css">
     body {
+      margin: auto;
       padding: 80px;
+      max-width: 1000px;
     }
     footer {
       text-align: center;
@@ -22,10 +24,7 @@
       text-decoration: none;
     }
     .navbar {
-      z-index: 0;
-    }
-    .email {
-      text-align: right;
+      z-index: 1;
     }
   </style>
 </head>
@@ -35,7 +34,7 @@
 <header>
   <nav class="navbar navbar-default navbar-fixed-top">
     <div class="navbar-header">
-      <a class="navbar-brand">Finances</a>
+      <a href="/" class="navbar-brand">Finances [0.5.0]</a>
     </div>
 
     <ul class="nav navbar-nav">
@@ -71,12 +70,11 @@
   {{ !base }}
 
   % if defined('error'):
-    <section class="well bs-component">
-        % include('error.html', error=get('error'))
-    </section>
+    % include('error.html', error=get('error'))
   % end
-
 </article>
+
+<a href="https://github.com/afonasev/finances"><img style="position: fixed; top: 0; right: 0; border: 0; z-index: 2" src="https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png"></a>
 
   <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
   <script src="/js/bootstrap.min.js"></script>

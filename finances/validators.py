@@ -20,7 +20,7 @@ def email_pass_correct(func):
 
         if len(password) < 6:
             raise cls.ValidationError(
-                'Length of password must be greater than 5 letters'
+                'Length of the password must be greater than 5 letters'
             )
 
         if not re.search('\d+', password):
@@ -35,3 +35,15 @@ def email_pass_correct(func):
 
 def is_correct_email(email):
     return bool(re.search('.+@.+\..+', email))
+
+
+def target_source_owner(func):
+    def wrapper(cls, creator, source, target, *args, **kwargs):
+        if source.owner != creator:
+            raise cls.AccessError('User does not own source account')
+
+        if target.owner != creator:
+            raise cls.AccessError('User does not own target account')
+
+        return func(cls, creator, source, target, *args, **kwargs)
+    return wrapper

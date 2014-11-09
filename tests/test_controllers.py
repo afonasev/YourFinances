@@ -7,7 +7,7 @@ import finances
 from finances import models
 
 
-class TestControlles(unittest.TestCase):
+class TestControllers(unittest.TestCase):
     test_email = 'user@mail.com'
     test_password = 'abc456'
 
@@ -62,10 +62,10 @@ class TestControlles(unittest.TestCase):
         self.assertIn('The password should contain letters', answer_page)
 
         # Test: register new user successful
-        answer_page = self.app.post(url, {
+        self.app.post(url, {
             'email': self.test_email,
             'password': self.test_password,
-        }).text
+        })
         self.assertTrue(models.User._check(email=self.test_email))
 
         # Test: try register duplicate user
@@ -73,7 +73,7 @@ class TestControlles(unittest.TestCase):
             'email': self.test_email,
             'password': self.test_password,
         }).text
-        self.assertIn('User with this email already exists', answer_page)
+        self.assertIn('User with same email already exists', answer_page)
 
     def test_login(self):
         url = '/login'
@@ -120,10 +120,10 @@ class TestControlles(unittest.TestCase):
         )
 
         # Test: login successful
-        answer_page = self.app.post(url, {
+        self.app.post(url, {
             'email': self.test_email,
             'password': self.test_password,
-        }).text
+        })
 
         self.assertTrue(self.app.cookies.get('user_id'))
 
