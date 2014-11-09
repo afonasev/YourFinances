@@ -1,7 +1,6 @@
 from datetime import datetime
 
 import peewee
-from bottle import view
 from bottle import redirect
 from bottle import static_file
 
@@ -10,9 +9,9 @@ from . import utils
 from .models import User
 from .models import Account
 from .models import Transaction
+from .utils import view
 from .utils import redirect_back
 from .utils import login_required
-from .utils import errors_handler
 from .utils import ApplicationError
 
 
@@ -33,7 +32,6 @@ def register():
 
 @app.post('/register')
 @view('auth/register')
-@errors_handler
 def register_do():
     user = User.reg(utils.get('email'), utils.get('password'))
     utils.set_cookie('user_id', user.id)
@@ -48,7 +46,6 @@ def login():
 
 @app.post('/login')
 @view('auth/login')
-@errors_handler
 def login_do():
     user = User.auth(utils.get('email'), utils.get('password'))
     utils.set_cookie('user_id', user.id)
@@ -78,7 +75,6 @@ def accounts(user):
 @app.post('/account')
 @view('accounts')
 @login_required
-@errors_handler
 def create_account(user):
     Account.reg(
         owner=user, name=utils.get('name'),
@@ -90,7 +86,6 @@ def create_account(user):
 @app.post('/account/<name>')
 @view('accounts')
 @login_required
-@errors_handler
 def update_account(user, name):
     # TODO: REFACTOR ME
     account = Account.get(name=name, owner=user)
@@ -120,7 +115,6 @@ def delete_account(user, name):
 @app.post('/transaction')
 @view('accounts')
 @login_required
-@errors_handler
 def create_transaction(user):
     # TODO: REFACTOR ME
     date = utils.get('date')
@@ -158,6 +152,5 @@ def static(filetype, filepath):
 
 @app.error(404)
 @view('error404')
-@errors_handler
 def mistake404(code):
     raise PageNotExist('Sorry, this page does not exist (404 error)')

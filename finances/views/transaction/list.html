@@ -1,8 +1,8 @@
 % from finances.models import Transaction
 
-% transactions = user.transactions.order_by(
+% transactions = list(user.transactions.order_by(
 %   Transaction.date.desc()
-% ).limit(15).execute()
+% ).limit(15).execute())
 
 % if transactions:
   <table class="table table-striped table-hover ">
@@ -17,7 +17,6 @@
       </tr>
     </thead>
     <tbody>
-    <hr/>
 
     % for transaction in transactions:
 

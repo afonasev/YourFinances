@@ -64,7 +64,9 @@ class User(_BaseModel):
     def reg(cls, email, password):
         if User._check(email=email):
             raise cls.RegError('User with same email already exists')
-        return User.create(email=email, password=get_hash(password))
+        user = User.create(email=email, password=get_hash(password))
+        Account.reg(user, 'Cash')
+        return user
 
     class AuthError(ApplicationError):
         pass

@@ -26,6 +26,18 @@ set_cookie = lambda name, val: bottle.response.set_cookie(
 del_cookie = lambda name: bottle.response.delete_cookie(name)
 
 
+def view(tpl_name, **defaults):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            try:
+                res = func(*args, **kwargs)
+            except ApplicationError as exc:
+                return {'error': exc}
+            return res
+        return bottle.view(tpl_name, **defaults)(wrapper)
+    return decorator
+
+
 def redirect_back():
     try:
         referer = bottle.request.headers['referer']
@@ -39,18 +51,6 @@ def redirect_back():
         bottle.redirect(route)
 
     bottle.redirect('/')
-
-
-def errors_handler(func):
-    def wrapper(*args, **kwargs):
-        try:
-            res = func(*args, **kwargs)
-
-        except ApplicationError as exc:
-            return {'error': exc}
-
-        return res
-    return wrapper
 
 
 def login_required(func):
