@@ -1,7 +1,7 @@
 % type = 'primary'
 <div class="panel panel-{{ type }}">
   <div class="panel-heading" style="padding: 5px;">
-    <h3 class="panel-title">{{ account.name }}: {{ account.balance }}</h3>
+    <h3 class="panel-title">{{ account.name }}</h3>
   </div>
   <div class="panel-body" style="padding: 5px;">
     <table width="100%" align="center">
@@ -9,25 +9,19 @@
 
         <td>
           <form action="/account/{{ account.name }}" method="POST" class="form-horizontal">
-            <input required name="name" type="text" class="input-sm" placeholder="{{ account.name }}" style="color: gray;">
-            <button type="submit" class="btn-xs btn-{{ type }}">Set name</button>
+            <input name="name" type="text" class="input-sm" placeholder="{{ account.name }}" style="color: gray;">
+            <input name="balance" type="number" step="0.01" class="input-sm" placeholder="{{ account.balance }}" style="color: gray;">
+            <button type="submit" class="btn-xs btn-{{ type }}">Set</button>
           </form>
         </td>
 
         <td>
-          <form action="/account/{{ account.name }}" method="POST" class="form-horizontal">
-            <input required name="balance" type="number" step="0.01" class="input-sm" placeholder="{{ account.balance }}" style="color: gray;">
-            <button type="submit" class="btn-xs btn-{{ type }}">Set balance</button>
-          </form>
-        </td>
-
-        <td>
-          <b>Count of transactions:</b> {{account.transactions.count()}}
+          <b>Total:</b> {{account.balance}}
         </td>
 
         <td>
           <a href="/account/delete/{{ account.name }}"
-             class="btn-xs btn-danger"> DROP </a>
+             class="btn-xs btn-danger"> Delete </a>
         </td>
 
       </tr>

@@ -1,5 +1,17 @@
 % rebase('base.html')
-% include('account/list.html')
-% include('transaction/list.html')
-% include('account/create_form.html')
-% include('transaction/create_form.html')
+% from finances.utils import get_user
+% user = get_user()
+
+<aside>
+  % include('account/create_form.html')
+  % include('transaction/create_form.html')
+</aside>
+
+<article>
+  % if defined('error'):
+  %   include('error.html', error=get('error'))
+  % end
+
+  % include('account/list.html')
+  % include('transaction/list.html')
+</article>

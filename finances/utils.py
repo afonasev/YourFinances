@@ -26,6 +26,14 @@ set_cookie = lambda name, val: bottle.response.set_cookie(
 del_cookie = lambda name: bottle.response.delete_cookie(name)
 
 
+def get_user():
+    from .models import User
+    user_id = get_cookie('user_id')
+    if User._check(id=user_id):
+        return User.get(id=user_id)
+    return None
+
+
 def view(tpl_name, **defaults):
     def decorator(func):
         def wrapper(*args, **kwargs):
@@ -55,21 +63,10 @@ def redirect_back():
 
 def login_required(func):
     def wrapper(*args, **kwargs):
-        from . import User
-        user_id = get_cookie('user_id')
-
-        if not user_id:
+        user = get_user()
+        if not user:
             bottle.redirect('/login')
-
-        if not User._check(id=user_id):
-            bottle.redirect('/login')
-
-        user = User.get(id=user_id)
-
-        res = func(user, *args, **kwargs) or {}
-        res['user'] = user
-
-        return res
+        return func(user, *args, **kwargs)
     return wrapper
 
 

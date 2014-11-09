@@ -10,20 +10,21 @@
         <td>
           <form action="/account/{{ account.name }}" method="POST" class="form-horizontal">
             <input required name="name" type="text" class="input-sm" placeholder="{{ account.name }}" style="color: gray;">
-            <button type="submit" class="btn-xs btn-{{ type }}">Set name</button>
+            <button type="submit" class="btn-xs btn-{{ type }}">Set</button>
           </form>
         </td>
 
         <td>
+          <b>Transactions:</b> {{account.transactions.count()}}
         </td>
 
         <td>
-          <b>Count of transactions:</b> {{account.transactions.count()}}
+          <b>Total:</b> {{account.balance}}
         </td>
 
         <td>
           <a href="/account/delete/{{ account.name }}"
-             class="btn-xs btn-danger"> DROP </a>
+             class="btn-xs btn-danger"> Delete </a>
         </td>
 
       </tr>
