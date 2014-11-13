@@ -5,11 +5,11 @@ v0.5.2 [![Build Status](https://drone.io/github.com/Afonasev/Finances/status.png
 ... not yet done ...
 
 ####How to use
-For start server: `$ manage.py run`
+For init database: `$ manage.py init`
 
 For run tests: `$ manage.py test`
 
-For init database: `$ manage.py init`
+For start server: `$ manage.py run`
 
 For more information about **Finances** configuration see example_config.py
 
