@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/Afonasev/Finances.png?label=ready&title=Ready)](https://waffle.io/Afonasev/Finances)
 #Finances
 v0.5.2 [![Build Status](https://drone.io/github.com/Afonasev/Finances/status.png)](https://drone.io/github.com/Afonasev/Finances/latest)
 
